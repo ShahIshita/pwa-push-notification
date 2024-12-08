@@ -1,62 +1,45 @@
-import { defineConfig } from 'vite';
-import vue from '@vitejs/plugin-vue';
-import { VitePWA } from 'vite-plugin-pwa';
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
       manifest: {
-        name: 'My PWA App',
-        short_name: 'PWA App',
-        description: 'A simple PWA using Vue 3 and Vite',
-        theme_color: '#ffffff',
+        name: "My PWA App",
+        short_name: "PWA App",
+        description: "A simple PWA using Vue 3 and Vite",
+        theme_color: "#ffffff",
         icons: [
           {
-            src: 'icons/vite.svg',
-            sizes: '192x192',
-            type: 'image/png'
+            src: "icons/vite.svg",
+            sizes: "192x192",
+            type: "image/png",
           },
           {
-            src: 'icons/vue.svg',
-            sizes: '512x512',
-            type: 'image/png'
-          }
-        ]
+            src: "icons/vue.svg",
+            sizes: "512x512",
+            type: "image/png",
+          },
+        ],
       },
-      registerType: 'autoUpdate',
+      registerType: "autoUpdate",
       workbox: {
         runtimeCaching: [
           {
-            urlPattern: ({ request }) => request.destination === 'document',
-            handler: 'NetworkFirst',
+            urlPattern: /^https:\/\/picsum\.photos\/id\/\d+\/200\/300$/i,
+            handler: "CacheFirst",
             options: {
-              cacheName: 'html-cache',
-            }
+              cacheName: "images-cache",
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 7 * 24 * 60 * 60, // Cache for 7 days
+              },
+            },
           },
-          {
-            urlPattern: ({ request }) => request.destination === 'script',
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'js-cache',
-            }
-          },
-          {
-            urlPattern: ({ request }) => request.destination === 'style',
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'css-cache',
-            }
-          },
-          {
-            urlPattern: ({ request }) => request.destination === 'image',
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'image-cache',
-            }
-          }
-        ]
-      }
-    })
-  ]
+        ],
+      },
+    }),
+  ],
 });

@@ -3,9 +3,9 @@ import { registerSW } from 'virtual:pwa-register';
 
 const updateSW = registerSW({
   onNeedRefresh() {
-    // prompt user to refresh the page
+    // will execute when user get stable internet
   },
   onOfflineReady() {
-    // inform the user that they can now use the app offline
+    // will execute when user lost internet connection
   },
 });

@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
+      registerType: "autoUpdate",
       manifest: {
         name: "My PWA App",
         short_name: "PWA App",
@@ -24,7 +25,6 @@ export default defineConfig({
           },
         ],
       },
-      registerType: "autoUpdate",
       workbox: {
         runtimeCaching: [
           {

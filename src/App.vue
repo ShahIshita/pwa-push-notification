@@ -1,36 +1,119 @@
 <template>
   <div class="app">
-    <h1>Random Image Gallery</h1>
-    <button @click="fetchImages">Load New Images</button>
-    <div class="gallery">
-      <img
-        v-for="(image, index) in images"
-        :key="index"
-        :src="image"
-        :alt="'Random Image ' + (index + 1)"
-      />
+    <h1>Vue PWA Push Notifications</h1>
+    <div class="button-group">
+    <button @click="requestPermission">Enable Notifications</button>
+    </div>
+    <div class="button-group">
+    <button @click="sendBasicNotification">Basic Notification</button>
+    <button @click="sendActionNotification">Action Notification</button>
+    <button @click="sendPersistentNotification">Persistent Notification</button>
+    </div>
+    <div class="button-group">
+    <button @click="getExistingNotifications">Get Notifications</button>
     </div>
   </div>
 </template>
 
-<script>
-import { ref } from "vue";
-
-export default {
-  setup() {
-    const images = ref([]);
-
-    const fetchImages = async () => {
-      images.value = [];
-      for (let i = 0; i < 10; i++) {
-        const randomImageUrl = `https://picsum.photos/id/${i + 1}/200/300`;
-        images.value.push(randomImageUrl);
-      }
-    };
-
-    return { images, fetchImages };
-  },
+<script setup>
+const requestNotificationPermission = async () => {
+  if (Notification.permission === "default") {
+    await Notification.requestPermission();
+  }
 };
+
+const requestPermission = () => {
+  if ("Notification" in window) {
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted") {
+        alert("Notifications enabled!");
+      } else if (permission === "denied") {
+        alert("Notifications denied!");
+      }
+    });
+  } else {
+    alert("Notifications are not supported in this browser.");
+  }
+};
+
+const sendBasicNotification = async () => {
+  if ("serviceWorker" in navigator && Notification.permission === "granted") {
+    const registration = await navigator.serviceWorker.ready;
+    const existingNotifications = await registration.getNotifications();
+    console.log("Existing Notifications:", existingNotifications);
+
+    registration.showNotification("Basic Notification", {
+      body: "This is a simple notification!",
+      icon: "icons/vue.svg",
+      tag: "basic_notification", 
+    });
+  } else {
+    alert("Enable notifications first!");
+  }
+};
+
+const sendActionNotification = async () => {
+  await requestNotificationPermission();
+  
+  if ("serviceWorker" in navigator && Notification.permission === "granted") {
+    const registration = await navigator.serviceWorker.ready;
+    registration.showNotification("Action Notification", {
+      body: "Click the button below to visit Vue.js!",
+      icon: "icons/vue.svg",
+      tag: "action_notification",
+      actions: [
+        { action: "open_vue", title: "Open Vue.js" }
+      ],
+      requireInteraction: true,
+    });
+  } else {
+    alert("Enable notifications first!");
+  }
+};
+
+
+const sendPersistentNotification = async () => {
+  if ("serviceWorker" in navigator && Notification.permission === "granted") {
+    const registration = await navigator.serviceWorker.ready;
+    registration.showNotification("Persistent Notification", {
+      body: "This notification won't go away until you interact!",
+      icon: "icons/vue.svg",
+      tag: "persistent_notification",
+      requireInteraction: true,
+      actions: [{ action: "close", title: "Close" }]
+    });
+  } else {
+    alert("Enable notifications first!");
+  }
+};
+
+const getExistingNotifications = async () => {
+  if ("serviceWorker" in navigator) {
+    const registration = await navigator.serviceWorker.ready;
+    const notifications = await registration.getNotifications();
+
+    if (notifications.length === 0) {
+      alert("No active notifications.");
+      return;
+    }
+
+    let message = `📢 Active Notifications (${notifications.length}):\n\n`;
+
+    notifications.forEach((notification, index) => {
+      message += `🔔 Notification ${index + 1}:\n`;
+      message += `Title: ${notification.title}\n`;
+      message += `Body: ${notification.body}\n`;
+      message += `Tag: ${notification.tag}\n`;
+      message += `Time: ${new Date(notification.timestamp).toLocaleString()}\n`;
+      message += `-------------------------\n`;
+    });
+
+    alert(message);
+  } else {
+    alert("Notifications are not supported in this browser.");
+  }
+};
+
 </script>
 
 <style>
@@ -42,17 +125,12 @@ button {
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
+  margin: 10px;
 }
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+.button-group {
+  display: flex;
   gap: 10px;
-  margin-top: 20px;
-}
-img {
-  width: 100%;
-  height: auto;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+  margin-bottom: 10px;
 }
 </style>

@@ -23,7 +23,7 @@ const requestNotificationPermission = async () => {
 };
 
 const requestPermission = () => {
-  if ("Notification" in window) {
+  if ("Notification" in window) {  // Check if notifications are supported
     Notification.requestPermission().then((permission) => {
       if (permission === "granted") {
         alert("Notifications enabled!");
@@ -37,23 +37,29 @@ const requestPermission = () => {
 };
 
 const sendBasicNotification = async () => {
+  // Check if service workers are supported in the browser
+  // and if the user has granted notification permission.
   if ("serviceWorker" in navigator && Notification.permission === "granted") {
-    const registration = await navigator.serviceWorker.ready;
-    const existingNotifications = await registration.getNotifications();
+
+    const registration = await navigator.serviceWorker.ready;   // Wait for the service worker to be fully active and ready
+
+    const existingNotifications = await registration.getNotifications(); // Retrieve any existing notifications to check if there are active ones
     console.log("Existing Notifications:", existingNotifications);
 
+    // registration.showNotification, Displays a push notification.
     registration.showNotification("Basic Notification", {
-      body: "This is a simple notification!",
+      body: "This is a simple notification!", 
       icon: "icons/vue.svg",
       tag: "basic_notification", 
     });
+
   } else {
     alert("Enable notifications first!");
   }
 };
 
 const sendActionNotification = async () => {
-  await requestNotificationPermission();
+  await requestNotificationPermission();  // Request notification permission if not already granted
   
   if ("serviceWorker" in navigator && Notification.permission === "granted") {
     const registration = await navigator.serviceWorker.ready;
@@ -62,9 +68,9 @@ const sendActionNotification = async () => {
       icon: "icons/vue.svg",
       tag: "action_notification",
       actions: [
-        { action: "open_vue", title: "Open Vue.js" }
+        { action: "open_vue", title: "Open Vue.js" },
       ],
-      requireInteraction: true,
+      requireInteraction: false, // Keeps the notification visible(true) until the user interacts , false it will vanish after sometime
     });
   } else {
     alert("Enable notifications first!");
@@ -79,8 +85,8 @@ const sendPersistentNotification = async () => {
       body: "This notification won't go away until you interact!",
       icon: "icons/vue.svg",
       tag: "persistent_notification",
-      requireInteraction: true,
-      actions: [{ action: "close", title: "Close" }]
+      requireInteraction: true,  // // Ensures notification stays on screen until action is taken
+      actions: [{ action: "close", title: "Close" }]  // User can mannual close this an notification
     });
   } else {
     alert("Enable notifications first!");
@@ -90,8 +96,8 @@ const sendPersistentNotification = async () => {
 const getExistingNotifications = async () => {
   if ("serviceWorker" in navigator) {
     const registration = await navigator.serviceWorker.ready;
-    const notifications = await registration.getNotifications();
-
+    const notifications = await registration.getNotifications();   // Retrieve the list of currently active notifications
+    console.log("Get Notifications:", notifications);
     if (notifications.length === 0) {
       alert("No active notifications.");
       return;
@@ -100,7 +106,7 @@ const getExistingNotifications = async () => {
     let message = `📢 Active Notifications (${notifications.length}):\n\n`;
 
     notifications.forEach((notification, index) => {
-      message += `🔔 Notification ${index + 1}:\n`;
+      message += `Notification ${index + 1}:\n`;
       message += `Title: ${notification.title}\n`;
       message += `Body: ${notification.body}\n`;
       message += `Tag: ${notification.tag}\n`;

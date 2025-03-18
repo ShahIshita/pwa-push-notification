@@ -24,7 +24,7 @@ const requestNotificationPermission = async () => {
 
 const requestPermission = () => {
   if ("Notification" in window) {  // Check if notifications are supported
-    Notification.requestPermission().then((permission) => {
+    Notification.requestPermission().then((permission) => {  // Request permission from the user to display notifications
       if (permission === "granted") {
         alert("Notifications enabled!");
       } else if (permission === "denied") {
